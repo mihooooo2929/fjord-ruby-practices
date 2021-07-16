@@ -1,4 +1,5 @@
-1..30.times do |n|
+n = 1
+while n < 21 do
     if n % 15 == 0
         puts "fizzbuzz"  
     elsif n % 3 == 0
@@ -8,4 +9,5 @@
     else 
         puts n
     end
+    n += 1
 end
