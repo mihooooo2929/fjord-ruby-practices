@@ -8,5 +8,4 @@
   else 
     puts n
   end
-  n += 1
 end
