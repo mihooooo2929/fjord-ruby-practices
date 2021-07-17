@@ -1,5 +1,4 @@
-n = 1
-while n < 21 do
+(1..20).each do |n|
   if n % 15 == 0
     puts "fizzbuzz"  
   elsif n % 3 == 0
