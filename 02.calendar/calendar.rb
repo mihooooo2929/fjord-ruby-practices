@@ -2,9 +2,6 @@ require 'date'
 require 'optparse'
 
 options = ARGV.getopts('y:m:')
-puts options
-puts options["y"]
-puts options["m"]
 
 if options["y"] && options["m"]
   year =  options["y"].to_i
