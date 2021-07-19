@@ -1,8 +1,17 @@
 require 'date'
+require 'optparse'
 
-if ARGV[0] && ARGV[1]
-  year = ARGV[1].to_i
-  month = ARGV[0].to_i
+options = ARGV.getopts('y:m:')
+puts options
+puts options["y"]
+puts options["m"]
+
+if options["y"] && options["m"]
+  year =  options["y"].to_i
+  month = options["m"].to_i
+elsif options["m"]
+  year = Time.now.year
+  month = options["m"].to_i
 else
   year = Time.now.year
   month = Time.now.month
