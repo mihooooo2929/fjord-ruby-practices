@@ -18,9 +18,9 @@ elsif options["l"] == true && options["r"] == true && options["a"] == false
 elsif options["a"] == true && options["l"] == false && options["r"] == false
     Dir::entries(".").sort
 elsif options["l"] == true && options["a"] == false && options["r"] == false
-    Dir::entries(".").sort
+    Dir.glob("*").sort
 elsif options["r"] == true && options["a"] == false && options["l"] == false
-    Dir::entries(".").sort.reverse
+    Dir.glob("*").sort.reverse
 else
     items = Dir.glob("*")
 end
