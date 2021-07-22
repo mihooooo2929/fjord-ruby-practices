@@ -3,6 +3,19 @@ require 'optparse'
 
 options = ARGV.getopts('y:m:')
 
+year = if options["y"]
+         options["y"].to_i
+       else
+         Time.now.year
+       end
+
+month = if options["m"]
+          options["m"].to_i
+        else
+          Time.now.month
+        end
+
+
 if options["y"] && options["m"]
   year =  options["y"].to_i
   month = options["m"].to_i
