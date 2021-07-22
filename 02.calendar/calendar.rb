@@ -23,11 +23,9 @@ puts header.center(20)
 puts week.join(" ") 
 print "   " * first_day_weekday
 
-i = 1
-while i <= this_month_date
-  print i.to_s.rjust(2) + " "
-  i += 1
-  if (i + first_day_weekday -1) % 7 == 0
+Range.new(1,this_month_date).each do |date|
+  print date.to_s.rjust(2) + " "
+  if (date + first_day_weekday) % 7 == 0
     print "\n"
   end
 end
