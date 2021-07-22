@@ -3,24 +3,26 @@
 require 'optparse'
 require 'etc'
 
+MAX_COLUMN = 3
+
 options = ARGV.getopts('alr')
-puts "\n"
+options_a = options['a']
+options_l = options['l']
+options_r = options['r']
 
-set_max_column = 3
-
-items = if options['a'] == true && options['l'] == true && options['r'] == true
+items = if options_a == true && options_l == true && options_r == true
           Dir.entries('.').reverse
-        elsif options['a'] == true && options['l'] == true && options['r'] == false
+        elsif options_a == true && options_l == true && options_r == false
           Dir.entries('.').sort
-        elsif options['a'] == true && options['r'] == true && options['l'] == false
+        elsif options_a == true && options_r == true && options_l == false
           Dir.entries('.').reverse
-        elsif options['l'] == true && options['r'] == true && options['a'] == false
+        elsif options_l == true && options_r == true && options_a == false
           Dir.glob('*').reverse
-        elsif options['a'] == true && options['l'] == false && options['r'] == false
+        elsif options_a == true && options_l == false && options_r == false
           Dir.entries('.').sort
-        elsif options['l'] == true && options['a'] == false && options['r'] == false
+        elsif options_l == true && options_a == false && options_r == false
           Dir.glob('*').sort
-        elsif options['r'] == true && options['a'] == false && options['l'] == false
+        elsif options_r == true && options_a == false && options_l == false
           Dir.glob('*').reverse
         else
           Dir.glob('*')
@@ -28,44 +30,30 @@ items = if options['a'] == true && options['l'] == true && options['r'] == true
 
 window_length = `tput cols`.to_i
 max_item_string_length = 0
+
 items.each do |item|
   max_item_string_length = item.to_s.length if max_item_string_length <= item.to_s.length
 end
+
 number_of_columns = window_length / (max_item_string_length + 1)
-number_of_columns = set_max_column if number_of_columns > set_max_column
+number_of_columns = MAX_COLUMN if number_of_columns > MAX_COLUMN
 
-i = items.length % number_of_columns
-while i != 0 && options['l'] != true
-  items.push('')
-  i = items.length % number_of_columns
-end
-
-def method_for_general(items, number_of_columns, max_item_string_length)
-  number_of_rows = (items.length / number_of_columns.to_i).to_i
-  transposed_items = items.each_slice(number_of_rows).to_a.transpose
-  this_item_x = 0
-  ary = []
-  while this_item_x < transposed_items.length
-    this_item_y = 0
-    while this_item_y < number_of_columns
-      print transposed_items[this_item_x][this_item_y].ljust(max_item_string_length.to_i + 1, ' ')
-      ary << transposed_items[this_item_x][this_item_y]
-      this_item_y += 1
-    end
-    this_item_x += 1
-    ary.each_with_index do |_, i|
-      print "\n" if (i % (number_of_columns * this_item_x)).zero?
-    end
+def calculate_reminder(items, number_of_columns, options_l)
+  remainder_n = items.length % number_of_columns
+  while remainder_n != 0 && options_l != true
+    items.push('')
+    remainder_n = items.length % number_of_columns
   end
 end
 
-def method_for_l(items)
-  items.each do |item|
-    file_path = File.absolute_path(item.to_s)
-    file_stat = File.stat(file_path)
-    file_mode_2octal = file_stat.mode.to_s(2).rjust(8, '0')
-    file_mode_2octal_permission = (file_mode_2octal.to_i / 1) % 1_000_000_000
-    permission_number_ary = file_mode_2octal_permission.to_s.split('')
+calculate_reminder(items, number_of_columns, options_l)
+
+if options_l == true
+  items_length = 0
+  while items_length < items.length
+    item = items[items_length]
+    file_stat = File.stat(File.absolute_path(item.to_s))
+    permission_number_ary = ((file_stat.mode.to_s(2).to_i / 1) % 1_000_000_000).to_s.split('')
     file_type = file_stat.ftype
     case file_type
     when 'directory'
@@ -77,10 +65,11 @@ def method_for_l(items)
     end
     file_size = file_stat.size
     file_time_mtime = file_stat.mtime
-    file_time_mtime_m = file_time_mtime.month
-    file_time_mtime_d = file_time_mtime.day
-    file_time_mtime_hour = file_time_mtime.hour
-    file_time_mtime_min = file_time_mtime.min
+    mtime_m_string = file_time_mtime.month.to_s.rjust(2, ' ')
+    mtime_d_string = file_time_mtime.day
+    mtime_h_string = file_time_mtime.hour.to_s.rjust(2, '0')
+    mtime_min_string = file_time_mtime.min.to_s.rjust(2, '0')
+    file_time_mtime = "#{mtime_m_string} #{mtime_d_string} #{mtime_h_string}:#{mtime_min_string}"
     file_link = file_stat.nlink
     permission_number_ary.each_with_index do |n, i|
       n = if n == '1' && i.zero?
@@ -108,17 +97,35 @@ def method_for_l(items)
     end
     permission = permission_number_ary.join('')
     owner_uid = file_stat.uid
-    file_owner = Etc.getpwuid(owner_uid).name
+    owner = Etc.getpwuid(owner_uid).name
     group_uid = file_stat.gid
-    file_group = Etc.getgrgid(group_uid).name
-    print "#{file_type}#{permission} #{file_link.to_s.rjust(2, ' ')} #{file_owner} #{file_group} #{file_size.to_s.rjust(7, ' ')} #{file_time_mtime_m.to_s.rjust(2, ' ')} #{file_time_mtime_d} #{file_time_mtime_hour.to_s.rjust(2, '0')} #{file_time_mtime_min.to_s.rjust(2, '0')} #{item}"
+    group = Etc.getgrgid(group_uid).name
+    link_st = file_link.to_s.rjust(2, ' ')
+    size_st = file_size.to_s.rjust(8, ' ')
+    print "#{file_type}#{permission} #{link_st} #{owner} #{group} #{size_st} #{file_time_mtime} #{item}"
     print "\n"
+    items_length += 1
+  end
+else
+  number_of_rows = (items.length / number_of_columns.to_i).to_i
+  transposed_items = items.each_slice(number_of_rows).to_a.transpose
+  this_item_x = 0
+  transposed_items_ary = []
+
+  def print_new_line(transposed_items_ary, this_item_x, number_of_columns)
+    transposed_items_ary.each_with_index do |_, i|
+      print "\n" if (i % (number_of_columns * this_item_x)).zero?
+    end
+  end
+
+  while this_item_x < transposed_items.length
+    this_item_y = 0
+    while this_item_y < number_of_columns
+      print transposed_items[this_item_x][this_item_y].ljust(max_item_string_length.to_i + 1, ' ')
+      transposed_items_ary << transposed_items[this_item_x][this_item_y]
+      this_item_y += 1
+    end
+    this_item_x += 1
+    print_new_line(transposed_items_ary, this_item_x, number_of_columns)
   end
 end
-
-if options['l'] == true
-  method_for_l(items)
-else
-  method_for_general(items, number_of_columns, max_item_string_length)
-end
-print "\n"
