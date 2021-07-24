@@ -3,18 +3,9 @@ require 'optparse'
 
 options = ARGV.getopts('y:m:')
 
-year = if options["y"]
-         options["y"].to_i
-       else
-         Time.now.year
-       end
-
-month = if options["m"]
-          options["m"].to_i
-        else
-          Time.now.month
-        end
-
+year = options["y"] ? options["y"].to_i : Time.now.year
+month = options["m"] ? options["m"].to_i : Time.now.month
+    
 this_month_date = Date.new(year, month, -1).day
 week = ["日", "月", "火", "水", "木", "金", "土"]
 header = month.to_s + "月" + " " + year.to_s
