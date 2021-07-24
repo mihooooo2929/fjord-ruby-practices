@@ -24,7 +24,7 @@ puts header.center(20)
 puts week.join(" ") 
 print "   " * first_day_weekday
 
-Range.new(1,this_month_date).each do |date|
+(1..this_month_date).each do |date|
   print date.to_s.rjust(2) + " "
   if (date + first_day_weekday) % 7 == 0
     print "\n"
