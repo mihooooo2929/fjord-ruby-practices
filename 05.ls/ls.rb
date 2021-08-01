@@ -10,23 +10,15 @@ options_a = options['a']
 options_l = options['l']
 options_r = options['r']
 
-items = if options_a == true && options_l == true && options_r == true
-          Dir.entries('.').reverse
-        elsif options_a == true && options_l == true && options_r == false
-          Dir.entries('.').sort
-        elsif options_a == true && options_r == true && options_l == false
-          Dir.entries('.').reverse
-        elsif options_l == true && options_r == true && options_a == false
-          Dir.glob('*').reverse
-        elsif options_a == true && options_l == false && options_r == false
-          Dir.entries('.').sort
-        elsif options_l == true && options_a == false && options_r == false
-          Dir.glob('*').sort
-        elsif options_r == true && options_a == false && options_l == false
-          Dir.glob('*').reverse
+items = if options_a
+          Dir.glob("*", File::FNM_DOTMATCH)
         else
-          Dir.glob('*')
+          Dir.glob("*")
         end
+
+if options_r
+  items = items.reverse
+end
 
 window_length = `tput cols`.to_i
 max_item_string_length = 0
@@ -48,7 +40,7 @@ end
 
 calculate_reminder(items, number_of_columns, options_l)
 
-if options_l == true
+if options_l
   items_length = 0
   while items_length < items.length
     item = items[items_length]
