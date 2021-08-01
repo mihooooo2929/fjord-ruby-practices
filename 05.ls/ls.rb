@@ -72,14 +72,24 @@ if options_l == true
     file_time_mtime = "#{mtime_m_string} #{mtime_d_string} #{mtime_h_string}:#{mtime_min_string}"
     file_link = file_stat.nlink
     permission_number_ary.each_with_index do |n, i|
-      n = if n == '1' 
-            if (i == 6 || 3 || 0)
-              'r'
-            elsif (i == 7 || 4 || 1)
-              'w'
-            elsif (i == 8 || 5 || 2)
-              'x'
-            end
+      n = if n == '1' && i.zero?
+            'r'
+          elsif n == '1' && i == 3
+            'r'
+          elsif n == '1' && i == 6
+            'r'
+          elsif n == '1' && i == 1
+            'w'
+          elsif n == '1' && i == 4
+            'w'
+          elsif n == '1' && i == 7
+            'w'
+          elsif n == '1' && i == 2
+            'x'
+          elsif n == '1' && i == 5
+            'x'
+          elsif n == '1' && i == 8
+            'x'
           else
             '-'
           end
